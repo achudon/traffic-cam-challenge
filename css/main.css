@@ -1,7 +1,17 @@
+body {
+    text-align: left;
+    margin: 30px;
+}
+
 body, input {
     font-family: 'Helvetica Neue', Helvetica, sans-serif;
+    color: #324b75;
     font-size: 16px;
     font-weight: 300;
+}
+
+#search {
+    width: 350px;
 }
 
 #map {
