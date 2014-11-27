@@ -4,9 +4,21 @@
 
 var camData;
 var allMarkers;
+var mc;
+
+function resize() {
+    var mapTop = $('#map').position().top;
+    var winHeight = $(window).height();
+
+    var finalHeight = (winHeight - mapTop - 20);
+
+    $('#map').height(finalHeight);
+}
 
 // when window is loaded, add search functionality, map, and camera data
 $(document).ready(function() {
+    resize();
+
     var mapElem = document.getElementById('map');
     allMarkers = [];
 
@@ -27,6 +39,7 @@ $(document).ready(function() {
     // filter markers to display based on search string
     $('#search').bind('search keyup', function() {
         var idx;
+        var selectedMarkers = [];
 
         for (idx = 0; idx < camData.length; idx++) {
             var camera = camData[idx];
@@ -36,13 +49,14 @@ $(document).ready(function() {
             var containsString = camera.cameralabel.toLowerCase().indexOf(value) > -1;
 
             if(containsString) {
-                marker.setMap(map);
-            } else {
-                marker.setMap(null);
+                selectedMarkers.push(marker);
             }
         }
+        mc.clearMarkers();
+        mc.addMarkers(selectedMarkers);
     }); // end of search function
 
+    $(window).resize(resize);
 
     // get data from source and display it on map
     $.getJSON('http://data.seattle.gov/resource/65fc-btcc.json')
@@ -52,7 +66,8 @@ $(document).ready(function() {
                 var marker = new google.maps.Marker({
                     position: {
                         lat: Number(camera.location.latitude),
-                        lng: Number(camera.location.longitude)
+                        lng: Number(camera.location.longitude),
+                        animation: google.maps.Animation.DROP
                     },
                     map: map
                 });
@@ -60,11 +75,23 @@ $(document).ready(function() {
 
                 // set click event on marker to open info window
                 google.maps.event.addListener(marker, 'click', function() {
+                    // make marker bounce when clicked on
+                    console.log(camera.cameralabel + ' ' + marker.getPosition())
+                    map.panTo(this.getPosition());
+
+                    marker.setAnimation(google.maps.Animation.BOUNCE);
+
+                    setTimeout(function() {
+                        marker.setAnimation(google.maps.Animation.null);
+                    }, 700);
+
+
                     var html = '<p>' + camera.cameralabel + '</p>';
                     var img = '<img src=\"' + camera.imageurl.url + '\">';
                     infoWindow.setContent(html + '<br/>' + img);
+
+
                     infoWindow.open(map, this);
-                    map.panTo(this.getPosition());
                 }); // end of click event function
 
                 // set click event on map to close info window
@@ -72,6 +99,9 @@ $(document).ready(function() {
                     infoWindow.close();
                 });
             });
+
+            // create markerClusterer
+            mc = new MarkerClusterer(map, allMarkers);
         })
         .fail(function(error) {
             console.log(error);
