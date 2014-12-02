@@ -6,6 +6,7 @@ var camData;
 var allMarkers;
 var mc;
 
+// resize the map to fit the current window height
 function resize() {
     var mapTop = $('#map').position().top;
     var winHeight = $(window).height();
@@ -56,6 +57,7 @@ $(document).ready(function() {
         mc.addMarkers(selectedMarkers);
     }); // end of search function
 
+    // catch the window resize event
     $(window).resize(resize);
 
     // get data from source and display it on map
@@ -104,12 +106,12 @@ $(document).ready(function() {
             mc = new MarkerClusterer(map, allMarkers);
         })
         .fail(function(error) {
-            console.log(error);
+            alert(error);
         })
         .always(function() {
             $('#ajax-loader').fadeOut();
         })
-}); // end of document.ready funcction
+}); // end of document.ready function
 
 
 
